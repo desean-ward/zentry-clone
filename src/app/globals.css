@@ -130,7 +130,7 @@ body {
   }
 
   .hero-heading {
-    @apply uppercase font-grooved font-black text-5xl sm:right-10 sm:text-7xl md:text-9xl lg:text-[10rem];
+    @apply uppercase font-grooved font-black text-5xl md:text-7xl sm:right-10 lg:text-[10rem];
   }
 
   .about-subtext {

@@ -8,7 +8,7 @@ import {
   HeroWrapper,
   VideoIndicator,
 } from "./hero.styles";
-import CustomButton from "@/app/ui/custom-button/custom-button.ui";
+import CustomButton from "@/components/ui/custom-button/custom-button.ui";
 import { TiLocationArrow } from "react-icons/ti";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
@@ -245,16 +245,18 @@ const Hero = () => {
         />
 
         {/* Character Heading */}
-        <h2
-          id='character-name'
-          className='character-name text-grooved hero-heading absolute z-50 bottom-5 right-5 text-blue-100 text-shadow'
-        >
-          {characters[currentVideo].split("").map((char, index) => (
-            <span key={index} className='character-letter'>
-              {char}
-            </span>
-          ))}
-        </h2>
+        <div className="flex justify-center md:justify-none">
+          <h2
+            id='character-name'
+            className='character-name text-center hero-heading absolute z-50 mx-auto bottom-5 md:right-10 text-blue-100 text-shadow'
+          >
+            {characters[currentVideo].split("").map((char, index) => (
+              <span key={index} className='character-letter'>
+                {char}
+              </span>
+            ))}
+          </h2>
+        </div>
 
         {/* Hero Heading */}
         <HeroHeadingWrapper>
@@ -265,7 +267,7 @@ const Hero = () => {
             </h1>
 
             {/* Tagline */}
-            <p className='mb-5 max-w-128 font-robert-regular text-blue-100 text-6xl text-shadow'>
+            <p className='mb-5 max-w-128 font-robert-regular text-blue-100 text-4xl lg:text-6xl text-shadow text-center md:text-start'>
               The Dawn of Lumina
             </p>
 
@@ -282,24 +284,27 @@ const Hero = () => {
 
       {/* Black Heading Backdrop */}
       <div className='absolute left-[2.5rem] top-5'>
-        <h1 className='special-font hero-heading text-black text-shadow'>
+        <h1 className='special-font hero-heading text-black'>
           Eclipsed Re<b>a</b>lms
         </h1>
         {/* Tagline */}
-        <p className='mb-5 max-w-128 font-robert-regular text-black text-6xl'>
+        <p className='mb-5 max-w-128 font-robert-regular text-black text-4xl lg:text-6xl text-center md:text-start'>
           The Dawn of Lumina
         </p>
       </div>
 
       {/* Black Character Heading Backdrop */}
-      <h2 className='grooved hero-heading absolute bottom-5 right-5 text-black'>
+      <h2 className='hero-heading relative text-center md:text-end bottom-[4.25rem] md:bottom-[6rem] md:right-10'>
         {characters[currentVideo]}
       </h2>
 
       {/* Video Indicator */}
       <HeroVideoIndicator>
         {characters.map((dot, idx) => (
-          <VideoIndicator key={idx} className={idx === currentVideo && "bg-blue-50"} />
+          <VideoIndicator
+            key={idx}
+            className={idx === currentVideo && "bg-blue-50"}
+          />
         ))}
       </HeroVideoIndicator>
     </HeroWrapper>

@@ -2,7 +2,7 @@ import tw from "tailwind-styled-components";
 
 export const HeroWrapper = tw.section`
     relative 
-    h-dvh 
+    h-screen 
     w-screen 
     overflow-x-hidden
 `;
@@ -55,14 +55,17 @@ export const HeroHeadingContainer = tw.div`
 
 export const HeroVideoIndicator = tw.div`
     absolute 
-    bottom-5
+    bottom-0
     w-full 
     flex 
-    justify-start 
-    items-center
+    justify-center 
+    md:justify-start
+    md:items-center
     gap-4
-    pl-16
+    md:pl-8
+    lg:pl-16
     h-28 
+    md:h-14
     z-50 
 `
 
@@ -70,5 +73,7 @@ export const VideoIndicator = tw.div`
     size-4 
     border-2 
     border-blue-50 
-    rounded-full
+    rounded-full 
+    mt-4 
+    md:mt-0
 `
