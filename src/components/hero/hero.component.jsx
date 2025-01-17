@@ -5,8 +5,6 @@ import {
   HeroHeadingWrapper,
   HeroVideoContainer,
   HeroWrapper,
-  MaskClipPath,
-  MiniVideoPlayer,
 } from "./hero.styles";
 import CustomButton from "@/app/ui/custom-button/custom-button.ui";
 import { TiLocationArrow } from "react-icons/ti";
@@ -15,43 +13,32 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const Hero = () => {
-  const [currentIndex, setCurrentIndex] = useState(1);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [hasClicked, setHasClicked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
+  const [currentVideo, setCurrentVideo] = useState(0);
+
+  // The characters names
+  const characters = [
+    "Luminar",
+    "Shadow Wraith",
+    "Eclipse Titan",
+    "Nova Flare",
+  ];
 
   // Total videos to play in the mini video player
   const totalVideos = 4;
 
   // Reference to next video
-  const nextVideoRef = useRef(null);
+  const video1Ref = useRef(null);
+  const video2Ref = useRef(null);
+  const video3Ref = useRef(null);
+  const video4Ref = useRef(null);
 
   // Handle video loaded
   const handleVideoLoad = () => {
     setLoadedVideos((prev) => prev + 1);
-  };
-
-  // Get next video index using the modulus operator
-  // 0 % 4 = 0 + 1 => 1
-  // 1 % 4 = 1 + 1 => 2
-  // 2 % 4 = 2 + 1 => 3
-  // 3 % 4 = 3 + 1 => 4
-  // 4 % 4 = 0 + 1 => 1
-  const upcomingVideoIndex = (currentIndex % totalVideos) + 1;
-
-  const handleMiniVidClick = () => {
-    setHasClicked(true);
-
-    // Increment the index
-    setCurrentIndex(upcomingVideoIndex);
-  };
-
-  const handleBackgroundImageIndex = () => {
-    const timeout = setTimeout(() => {
-      return getVideoSrc(currentIndex === 1 ? 4 : currentIndex - 1);
-    });
-
-    return () => clearTimeout(timeout);
   };
 
   // Get the video source for mini video player
@@ -65,37 +52,112 @@ const Hero = () => {
     if (loadedVideos === totalVideos - 1) setIsLoading(false);
   }, [loadedVideos]);
 
+  // Update playback rate
+  useEffect(() => {
+    video1Ref.current.playbackRate = 2;
+    video2Ref.current.playbackRate = 2;
+    video3Ref.current.playbackRate = 2;
+    video4Ref.current.playbackRate = 2;
+  }, []);
+
   // Video Switch Animation
   useGSAP(
     () => {
-      if (hasClicked) {
-        gsap.set("#next-video", {
-          visibility: "visible",
-        });
+      const stickySection = document.querySelector("#hero-section");
 
-        gsap.to("#next-video", {
-          transformOrigin: "center center",
-          scale: 1,
-          width: "100%",
-          height: "100%",
-          duration: 1,
-          ease: "power1.inOut",
-          onStart: () => nextVideoRef.current.play(),
-        });
+      if (!window || window === undefined) return;
 
-        gsap.from("#current-video", {
-          transformOrigin: "center center",
-          scale: 0,
-          duration: 1.5,
-          ease: "power1.inOut",
-        });
-      }
+      const totalStickyHeight = window.innerHeight * 5.5 + 500;
+      // Animate the character name
 
-      setHasClicked(false);
+      // Pin the sticky section
+      ScrollTrigger.create({
+        trigger: stickySection,
+        start: "top top",
+        end: () => `+=${totalStickyHeight}`,
+        pin: true,
+        pinSpacing: true,
+      });
+
+      gsap.set("#video-2", {
+        opacity: 1,
+      });
+      gsap.from("#video-2", {
+        opacity: 1,
+        scale: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#video-2",
+          start: "top-=400 top",
+          end: () => `+=${window.innerHeight}`,
+          scrub: true,
+        },
+        onComplete: () => {
+          video2Ref.current.play();
+          setCurrentVideo(1);
+        },
+        onReverseComplete: () => setCurrentVideo(0),
+      });
+
+      gsap.set("#video-3", {
+        opacity: 1,
+      });
+      gsap.from("#video-3", {
+        opacity: 1,
+        scale: 0,
+        duration: 1,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#video-2",
+          start: () => `${window.innerHeight * 1 + 500}`,
+          end: () => `${window.innerHeight * 3}`,
+          scrub: true,
+        },
+        onComplete: () => {
+          video3Ref.current.play();
+          setCurrentVideo(2);
+        },
+        onReverseComplete: () => setCurrentVideo(1),
+      });
+
+      gsap.set("#video-4", {
+        opacity: 1,
+      });
+      gsap.from("#video-4", {
+        opacity: 1,
+        scale: 0,
+        duration: 1,
+        ease: "none",
+        scrollTrigger: {
+          trigger: stickySection,
+          start: () => `${window.innerHeight * 3.5}`,
+          end: () => `${window.innerHeight * 5}`,
+          scrub: true,
+          markers: true,
+        },
+        onComplete: () => {
+          video4Ref.current.play();
+          setCurrentVideo(3);
+        },
+        onReverseComplete: () => setCurrentVideo(2),
+      });
     },
     { dependencies: [currentIndex], revertOnUpdate: true }
   );
 
+  // Animate the character name
+  useGSAP(() => {
+    const letters = document.querySelectorAll(
+      "#character-name .character-letter"
+    );
+
+    gsap.from(letters, {
+      opacity: 0,
+      stagger: 0.065, // Animates letters one by one with a slight delay
+    });
+  }, [characters[currentVideo]]);
+
+  // Animate the video frame at the end of scrolling
   useGSAP(() => {
     gsap.set("#video-frame", {
       clipPath: "polygon(14% 0%, 72% 0%, 90% 90%, 0% 95%)",
@@ -109,17 +171,17 @@ const Hero = () => {
       ease: "power1.inOut",
       scrollTrigger: {
         trigger: "#video-frame",
-        start: "center center",
-        end: "bottom center",
+        start: () => `${window.innerHeight * 4}`,
+        end: () => `${window.innerHeight * 5.5 + 500}`,
         scrub: true,
       },
     });
   });
 
   return (
-    <HeroWrapper>
+    <HeroWrapper id='hero-section'>
       {/* Loading Spinner */}
-      {isLoading && (
+      {/*isLoading && (
         <div className='flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50'>
           <div className='three-body'>
             <div className='three-body__dot' />
@@ -127,80 +189,109 @@ const Hero = () => {
             <div className='three-body__dot' />
           </div>
         </div>
-      )}
+      ) */}
+
       <HeroVideoContainer id='video-frame'>
-        <div>
-          {/* Mini Video Preview of Upcoming Video */}
-          <MaskClipPath>
-            <MiniVideoPlayer onClick={handleMiniVidClick}>
-              <video
-                loop
-                ref={nextVideoRef}
-                src={getVideoSrc(upcomingVideoIndex)}
-                muted
-                id='current-video'
-                className='size-64 origin-center scale-150 object-cover object-center'
-                onLoadedData={handleVideoLoad}
-              />
-            </MiniVideoPlayer>
-          </MaskClipPath>
+        {/* Video 1 */}
 
-          {/* Expanding Background */}
-          <video
-            ref={nextVideoRef}
-            src={getVideoSrc(currentIndex)}
-            loop
-            muted
-            id='next-video'
-            className='absolute-center invisible absolute z-20 size-64 object-cover object-center'
-            onLoadedData={handleVideoLoad}
-          />
+        <video
+          id='video-1'
+          ref={video1Ref}
+          src={getVideoSrc(1)}
+          autoPlay
+          loop
+          muted
+          preload='auto'
+          className='current absolute left-0 top-0 size-full object-cover object-center'
+          onLoadedData={handleVideoLoad}
+        />
 
-          {/* Background Video */}
-          <video
-            id='background-video'
-            src={getVideoSrc(currentIndex === 1 ? 4 : currentIndex - 1)}
-            autoPlay
-            loop
-            muted
-            preload='auto'
-            className='absolute left-0 top-0 size-full object-cover object-center'
-            onLoadedData={handleVideoLoad}
-          />
-        </div>
+        {/* Video 2 */}
+        <video
+          ref={video2Ref}
+          src={getVideoSrc(2)}
+          id='video-2'
+          loop
+          muted
+          preload='auto'
+          className='absolute opacity-0 left-0 top-0 size-full object-cover object-center'
+          onLoadedData={handleVideoLoad}
+        />
 
-        {/* Gaming Heading */}
-        <h2 className='special-font hero-heading absolute bottom-5 right-5 z-40 text-blue-75'>
-          G<b>a</b>ming
+        {/* Video 3 */}
+        <video
+          ref={video3Ref}
+          src={getVideoSrc(3)}
+          id='video-3'
+          loop
+          muted
+          preload='auto'
+          className='absolute opacity-0 left-0 top-0 size-full object-cover object-center'
+          onLoadedData={handleVideoLoad}
+        />
+
+        {/* Video 4 */}
+        <video
+          ref={video4Ref}
+          src={getVideoSrc(4)}
+          id='video-4'
+          loop
+          muted
+          preload='auto'
+          className='absolute opacity-0 left-0 top-0 size-full object-cover object-center'
+          onLoadedData={handleVideoLoad}
+        />
+
+        {/* Character Heading */}
+        <h2
+          id='character-name'
+          className='character-name text-grooved hero-heading absolute z-50 bottom-5 right-5 text-blue-100 text-shadow'
+        >
+          {characters[currentVideo].split("").map((char, index) => (
+            <span key={index} className='character-letter'>
+              {char}
+            </span>
+          ))}
         </h2>
 
         {/* Hero Heading */}
         <HeroHeadingWrapper>
           <HeroHeadingContainer>
             {/* Heading */}
-            <h1 className='special-font hero-heading text-blue-100'>
-              Redefi<b>n</b>e
+            <h1 className='hero-heading text-blue-100 text-shadow'>
+              Eclipsed Re<b>a</b>lms
             </h1>
 
             {/* Tagline */}
-            <p className='mb-5 max-w-64 font-robert-regular text-blue-100'>
-              Enter the Metagame Layer <br /> Unleash the Play Economy
+            <p className='mb-5 max-w-128 font-robert-regular text-blue-100 text-6xl text-shadow'>
+              The Dawn of Lumina
             </p>
 
-            {/* CTA Button */}
+            {/* CTA Button 
             <CustomButton
               id='watch-trailer'
               title='Watch Trailer'
               leftIcon={<TiLocationArrow />}
               containerClass='bg-yellow-300 flex-center gap-1'
-            />
+            /> */}
           </HeroHeadingContainer>
         </HeroHeadingWrapper>
       </HeroVideoContainer>
 
-      {/* Gaming Heading */}
-      <h2 className='special-font hero-heading absolute bottom-5 right-5 text-black'>
-        G<b>a</b>ming
+      {/* Black Heading Backdrop */}
+      <div className='absolute left-[2.5rem] top-5'>
+        <h1 className='special-font hero-heading text-black text-shadow'>
+          Eclipsed Re<b>a</b>lms
+        </h1>
+        {/* Tagline */}
+        <p className='mb-5 max-w-128 font-robert-regular text-black text-6xl'>
+          The Dawn of Lumina
+        </p>
+      </div>
+
+      {/* Black Character Heading Backdrop */}
+      <h2 className='grooved hero-heading absolute bottom-5 right-5 text-black'>
+        {characters[currentVideo]}
       </h2>
     </HeroWrapper>
   );

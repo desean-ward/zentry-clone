@@ -22,7 +22,7 @@ export const MaskClipPath = tw.div`
     absolute-center 
     absolute 
     z-50 
-    size-64 
+    size-full 
     cursor-pointer 
     overflow-hidden 
     rounded-lg
@@ -43,12 +43,12 @@ export const HeroHeadingWrapper = tw.div`
     absolute 
     left-0 
     top-0 
-    z-40 
+    z-50 
     size-full
 `;
 
 export const HeroHeadingContainer = tw.div`
-    mt-24 
+    mt-5 
     px-5 
     sm:px-10
 `;
