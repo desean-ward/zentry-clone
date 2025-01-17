@@ -4,7 +4,9 @@ import {
   HeroHeadingContainer,
   HeroHeadingWrapper,
   HeroVideoContainer,
+  HeroVideoIndicator,
   HeroWrapper,
+  VideoIndicator,
 } from "./hero.styles";
 import CustomButton from "@/app/ui/custom-button/custom-button.ui";
 import { TiLocationArrow } from "react-icons/ti";
@@ -293,6 +295,13 @@ const Hero = () => {
       <h2 className='grooved hero-heading absolute bottom-5 right-5 text-black'>
         {characters[currentVideo]}
       </h2>
+
+      {/* Video Indicator */}
+      <HeroVideoIndicator>
+        {characters.map((dot, idx) => (
+          <VideoIndicator key={idx} className={idx === currentVideo && "bg-blue-50"} />
+        ))}
+      </HeroVideoIndicator>
     </HeroWrapper>
   );
 };

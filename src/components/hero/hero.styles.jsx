@@ -52,3 +52,23 @@ export const HeroHeadingContainer = tw.div`
     px-5 
     sm:px-10
 `;
+
+export const HeroVideoIndicator = tw.div`
+    absolute 
+    bottom-5
+    w-full 
+    flex 
+    justify-start 
+    items-center
+    gap-4
+    pl-16
+    h-28 
+    z-50 
+`
+
+export const VideoIndicator = tw.div`
+    size-4 
+    border-2 
+    border-blue-50 
+    rounded-full
+`
