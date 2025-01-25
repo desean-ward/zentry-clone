@@ -8,11 +8,13 @@ import {
   HeroWrapper,
   VideoIndicator,
 } from "./hero.styles";
-import CustomButton from "@/components/ui/custom-button/custom-button.ui";
+import CustomButton from "@/app/ui/custom-button/custom-button.ui";
 import { TiLocationArrow } from "react-icons/ti";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import AnimatedHeading from "../../animations/animated-heading.animate";
+import SlideUp from "@/animations/slideUp.animate";
 
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -38,6 +40,11 @@ const Hero = () => {
   const video3Ref = useRef(null);
   const video4Ref = useRef(null);
 
+  // Reference to character name
+  const characterRef = useRef(null);
+  const blackCharacterRef = useRef(null);
+  const taglineRef = useRef(null);
+
   // Handle video loaded
   const handleVideoLoad = () => {
     setLoadedVideos((prev) => prev + 1);
@@ -62,17 +69,58 @@ const Hero = () => {
     video4Ref.current.playbackRate = 2;
   }, []);
 
-  // Video Switch Animation
+  // Split the character names for animation
+  useEffect(() => {
+    const character = characters[currentVideo];
+    const blackCharacter = characters[currentVideo];
+
+    // Wrap each letter in a span
+    const letters = character
+      .split("")
+      .map((char) =>
+        char === " " ? " " : `<span class="letter">${char}</span>`
+      );
+
+    // Wrap each black letter in a span
+    const blackLetters = blackCharacter
+      .split("")
+      .map((char) =>
+        char === " " ? " " : `<span class="letter">${char}</span>`
+      );
+
+    // ***** Inject the wrapped letters into the textRef element ***** /
+    if (characterRef.current) {
+      characterRef.current.innerHTML = letters.join("");
+    }
+
+    if (blackCharacterRef.current) {
+      blackCharacterRef.current.innerHTML = letters.join("");
+    }
+  }, [characters[currentVideo]]);
+
+  // ***** Video Switch Animation ***** /
   useGSAP(
     () => {
       const stickySection = document.querySelector("#hero-section");
 
       if (!window || window === undefined) return;
 
-      const totalStickyHeight = window.innerHeight * 5.5 + 500;
-      // Animate the character name
+      // ***** Total height of the Hero section w/videos ***** /
+      const totalStickyHeight = window.innerHeight * 4;
 
-      // Pin the sticky section
+      // ***** Fade in the Hero's title ***** /
+      gsap.fromTo(
+        "#hero-heading",
+        {
+          opacity: 0,
+        },
+        {
+          opacity: 1,
+          duration: 1,
+        }
+      );
+
+      // ***** Pin the sticky section ***** /
       ScrollTrigger.create({
         trigger: stickySection,
         start: "top top",
@@ -81,18 +129,17 @@ const Hero = () => {
         pinSpacing: true,
       });
 
-      gsap.set("#video-2", {
-        opacity: 1,
-      });
+      // Video 2
+      gsap.set("#video-2", { opacity: 1 });
       gsap.from("#video-2", {
-        opacity: 1,
         scale: 0,
-        ease: "none",
+        ease: "power1.out",
+        duration: 0.75,
         scrollTrigger: {
-          trigger: "#video-2",
-          start: "top-=400 top",
-          end: () => `+=${window.innerHeight}`,
-          scrub: true,
+          trigger: stickySection,
+          start: () => `${window.innerHeight / 2}`, // Start after the first video section
+          end: () => `${window.innerHeight}`, // End before the next video section
+          toggleActions: "play none play reverse",
         },
         onComplete: () => {
           video2Ref.current.play();
@@ -101,19 +148,17 @@ const Hero = () => {
         onReverseComplete: () => setCurrentVideo(0),
       });
 
-      gsap.set("#video-3", {
-        opacity: 1,
-      });
+      // Video 3
+      gsap.set("#video-3", { opacity: 1 });
       gsap.from("#video-3", {
-        opacity: 1,
         scale: 0,
-        duration: 1,
-        ease: "none",
+        ease: "power1.out",
+        duration: 0.75,
         scrollTrigger: {
-          trigger: "#video-2",
-          start: () => `${window.innerHeight * 1 + 500}`,
-          end: () => `${window.innerHeight * 3}`,
-          scrub: true,
+          trigger: stickySection,
+          start: () => `${window.innerHeight}`, // Start after Video 2's section
+          end: () => `${window.innerHeight * 2}`, // End before Video 4's section
+          toggleActions: "play none play reverse",
         },
         onComplete: () => {
           video3Ref.current.play();
@@ -122,20 +167,18 @@ const Hero = () => {
         onReverseComplete: () => setCurrentVideo(1),
       });
 
-      gsap.set("#video-4", {
-        opacity: 1,
-      });
+      // Video 4
+      gsap.set("#video-4", { opacity: 1 });
       gsap.from("#video-4", {
-        opacity: 1,
         scale: 0,
-        duration: 1,
-        ease: "none",
+        ease: "power1.out",
+        duration: 0.75,
         scrollTrigger: {
           trigger: stickySection,
-          start: () => `${window.innerHeight * 3.5}`,
-          end: () => `${window.innerHeight * 5}`,
-          scrub: true,
-          markers: true,
+          start: () => `${window.innerHeight * 2}`, // Start after Video 3's section
+          end: () => `${window.innerHeight * 3}`, // End at the end of the sticky section
+          toggleActions: "play none play reverse",
+          scrub: false,
         },
         onComplete: () => {
           video4Ref.current.play();
@@ -147,19 +190,7 @@ const Hero = () => {
     { dependencies: [currentIndex], revertOnUpdate: true }
   );
 
-  // Animate the character name
-  useGSAP(() => {
-    const letters = document.querySelectorAll(
-      "#character-name .character-letter"
-    );
-
-    gsap.from(letters, {
-      opacity: 0,
-      stagger: 0.065, // Animates letters one by one with a slight delay
-    });
-  }, [characters[currentVideo]]);
-
-  // Animate the video frame at the end of scrolling
+  // ***** Animate the video frame at the end of scrolling ***** /
   useGSAP(() => {
     gsap.set("#video-frame", {
       clipPath: "polygon(14% 0%, 72% 0%, 90% 90%, 0% 95%)",
@@ -172,10 +203,12 @@ const Hero = () => {
       borderRadius: "0 0 0 0",
       ease: "power1.inOut",
       scrollTrigger: {
-        trigger: "#video-frame",
-        start: () => `${window.innerHeight * 4}`,
-        end: () => `${window.innerHeight * 5.5 + 500}`,
-        scrub: true,
+        trigger: "#video-4",
+        start: () => `${window.innerHeight * 3}`,
+        end: () => `${window.innerHeight * 4}`,
+        toggleActions: "play none play reverse",
+        // scrub: true,
+        // markers: true,
       },
     });
   });
@@ -195,7 +228,6 @@ const Hero = () => {
 
       <HeroVideoContainer id='video-frame'>
         {/* Video 1 */}
-
         <video
           id='video-1'
           ref={video1Ref}
@@ -207,7 +239,6 @@ const Hero = () => {
           className='current absolute left-0 top-0 size-full object-cover object-center'
           onLoadedData={handleVideoLoad}
         />
-
         {/* Video 2 */}
         <video
           ref={video2Ref}
@@ -219,7 +250,6 @@ const Hero = () => {
           className='absolute opacity-0 left-0 top-0 size-full object-cover object-center'
           onLoadedData={handleVideoLoad}
         />
-
         {/* Video 3 */}
         <video
           ref={video3Ref}
@@ -231,7 +261,6 @@ const Hero = () => {
           className='absolute opacity-0 left-0 top-0 size-full object-cover object-center'
           onLoadedData={handleVideoLoad}
         />
-
         {/* Video 4 */}
         <video
           ref={video4Ref}
@@ -243,18 +272,18 @@ const Hero = () => {
           className='absolute opacity-0 left-0 top-0 size-full object-cover object-center'
           onLoadedData={handleVideoLoad}
         />
-
         {/* Character Heading */}
-        <div className="flex justify-center md:justify-none">
+        <div className='flex justify-center md:justify-none'>
           <h2
             id='character-name'
+            ref={characterRef}
             className='character-name text-center hero-heading absolute z-50 mx-auto bottom-5 md:right-10 text-blue-100 text-shadow'
           >
-            {characters[currentVideo].split("").map((char, index) => (
-              <span key={index} className='character-letter'>
-                {char}
-              </span>
-            ))}
+            {/* Animated Character Name */}
+            <AnimatedHeading
+              textRef={characterRef}
+              context={characters[currentVideo]}
+            />
           </h2>
         </div>
 
@@ -262,12 +291,20 @@ const Hero = () => {
         <HeroHeadingWrapper>
           <HeroHeadingContainer>
             {/* Heading */}
-            <h1 className='hero-heading text-blue-100 text-shadow'>
+            <h1
+              id='hero-heading'
+              className='hero-heading text-blue-100 text-shadow opacity-0'
+            >
               Eclipsed Re<b>a</b>lms
             </h1>
 
             {/* Tagline */}
-            <p className='mb-5 max-w-128 font-robert-regular text-blue-100 text-4xl lg:text-6xl text-shadow text-center md:text-start'>
+            <SlideUp textRef={taglineRef} content='Hero' />
+            <p
+              id='hero-tagline'
+              ref={taglineRef}
+              className='mb-5 max-w-128 font-robert-regular text-blue-100 text-4xl lg:text-6xl text-shadow text-center md:text-start opacity-0'
+            >
               The Dawn of Lumina
             </p>
 
@@ -283,24 +320,33 @@ const Hero = () => {
       </HeroVideoContainer>
 
       {/* Black Heading Backdrop */}
-      <div className='absolute left-[2.5rem] top-5'>
-        <h1 className='special-font hero-heading text-black'>
+      <div className='absolute left-[2.5rem] top-5 text-[#AC4300]'>
+        <h2 className='special-font hero-heading'>
           Eclipsed Re<b>a</b>lms
-        </h1>
+        </h2>
         {/* Tagline */}
-        <p className='mb-5 max-w-128 font-robert-regular text-black text-4xl lg:text-6xl text-center md:text-start'>
+        <p className='mb-5 max-w-128 font-robert-regular text-4xl lg:text-6xl text-center md:text-start'>
           The Dawn of Lumina
         </p>
       </div>
 
       {/* Black Character Heading Backdrop */}
-      <h2 className='hero-heading relative text-center md:text-end bottom-[4.25rem] md:bottom-[6rem] md:right-10'>
-        {characters[currentVideo]}
-      </h2>
+      <div className='flex justify-center md:justify-none'>
+        <h2
+          ref={blackCharacterRef}
+          className='hero-heading absolute text-center md:text-end bottom-5 md:right-10 text-[#AC4300]'
+        >
+          {/* Animated Character Name */}
+          <AnimatedHeading
+            textRef={blackCharacterRef}
+            context={characters[currentVideo]}
+          />
+        </h2>
+      </div>
 
       {/* Video Indicator */}
       <HeroVideoIndicator>
-        {characters.map((dot, idx) => (
+        {characters.map((_, idx) => (
           <VideoIndicator
             key={idx}
             className={idx === currentVideo && "bg-blue-50"}

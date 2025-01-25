@@ -5,6 +5,7 @@ export const HeroWrapper = tw.section`
     h-screen 
     w-screen 
     overflow-x-hidden
+    bg-black
 `;
 
 export const HeroVideoContainer = tw.div`
@@ -67,7 +68,7 @@ export const HeroVideoIndicator = tw.div`
     h-28 
     md:h-14
     z-50 
-`
+`;
 
 export const VideoIndicator = tw.div`
     size-4 
@@ -76,4 +77,4 @@ export const VideoIndicator = tw.div`
     rounded-full 
     mt-4 
     md:mt-0
-`
+`;

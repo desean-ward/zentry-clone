@@ -352,3 +352,8 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.word {
+  display: inline-block;
+  white-space: nowrap;
+}
